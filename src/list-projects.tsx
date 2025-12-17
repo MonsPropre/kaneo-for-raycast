@@ -682,6 +682,7 @@ function ProjectTasksList({ project }: { project: Project }) {
                             onTaskCreated={revalidate}
                           />
                         }
+                        onPop={revalidate}
                       />
 
                       <Action
@@ -896,6 +897,7 @@ export default function Command() {
                   title={`Open ${item.name}`}
                   icon={Icon.AppWindow}
                   target={<ProjectTasksList project={item} />}
+                  onPop={revalidate}
                 />
                 <Action.Push
                   title="Create Project"
