@@ -43,6 +43,13 @@ Before using the extension, you need to configure the following preferences:
 | **User ID**                                                                   | Your user ID (for task assignments)           | No       | N/A                     |
 | **Sort**                                                                      | Default sorting method (Priority or Due Date) | Yes      | Priority                |
 
+
+### Get your Kaneo Instance URL
+- For Cloud instance: https://cloud.kaneo.app
+- For Self-Hosting instance:
+   - https://api.your-instance-url (defined in docker container)
+   - https://web.your-instance-url (defined in docker container)
+
 ### Obtain the API Token for your Kaneo instance
 - Go to your Kaneo instance
 - Navigate to Settings (Profile Icon → Settings) → API Keys
