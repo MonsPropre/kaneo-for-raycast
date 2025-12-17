@@ -41,7 +41,7 @@
     {
       "name": "instanceUrl",
       "type": "textfield",
-      "title": "Instance URL",
+      "title": "API Instance URL",
       "description": "Your API instance URL",
       "default": "https://cloud.kaneo.app",
       "required": true
@@ -67,13 +67,6 @@
       "title": "API Token",
       "description": "Your API token",
       "required": true
-    },
-    {
-      "name": "userId",
-      "type": "textfield",
-      "title": "User ID",
-      "description": "Your user ID",
-      "required": false
     },
     {
       "name": "sort",
