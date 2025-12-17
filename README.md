@@ -47,8 +47,8 @@ Before using the extension, you need to configure the following preferences:
 ### Get your Kaneo Instance URL
 - For Cloud instance: https://cloud.kaneo.app
 - For Self-Hosting instance:
-   - https://api.your-instance-url (defined in docker container)
-   - https://web.your-instance-url (defined in docker container)
+   - https://api.your-instance-url (KANEO_API_URL)
+   - https://web.your-instance-url (KANEO_CLIENT_URL)
 
 ### Obtain the API Token for your Kaneo instance
 - Go to your Kaneo instance
