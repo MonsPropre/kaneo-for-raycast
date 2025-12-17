@@ -160,18 +160,10 @@ function CreateTaskForm({
   onTaskCreated: () => void;
 }) {
   const { pop } = useNavigation();
-  const { instanceUrl, apiToken, workspaceId } = getPreferenceValues<{
+  const { instanceUrl, apiToken } = getPreferenceValues<{
     instanceUrl: string;
     apiToken: string;
-    workspaceId: string;
   }>();
-
-  const { data: projects = [] } = useFetch<Project[]>(`${instanceUrl}/api/project?workspaceId=${workspaceId}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiToken}`,
-    },
-  });
 
   const { handleSubmit, itemProps } = useForm<CreateTaskFormValues>({
     async onSubmit(values) {
@@ -217,10 +209,8 @@ function CreateTaskForm({
     },
     validation: {
       title: FormValidation.Required,
-      description: FormValidation.Required,
       priority: FormValidation.Required,
       status: FormValidation.Required,
-      projectId: FormValidation.Required,
     },
   });
 
@@ -250,12 +240,6 @@ function CreateTaskForm({
       <Form.Dropdown title="Priority" {...itemProps.priority}>
         {priorityOptions.map((option) => (
           <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
-        ))}
-      </Form.Dropdown>
-      <Form.Dropdown title="Project" {...itemProps.projectId}>
-        <Form.Dropdown.Item title="No project" value="" icon={Icon.List} />
-        {projects.map((project) => (
-          <Form.Dropdown.Item key={project.id} value={project.id.toString()} title={project.name} />
         ))}
       </Form.Dropdown>
       <Form.DatePicker title="Due Date" {...itemProps.dueDate} />
