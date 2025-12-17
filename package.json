@@ -41,16 +41,16 @@
     {
       "name": "instanceUrl",
       "type": "textfield",
-      "title": "API Instance URL",
-      "description": "Your API instance URL",
+      "title": "Instance API URL",
+      "description": "Your instance API URL",
       "default": "https://cloud.kaneo.app",
       "required": true
     },
     {
       "name": "webInstanceUrl",
       "type": "textfield",
-      "title": "Web Instance URL",
-      "description": "Your web instance URL",
+      "title": "Instance Client URL",
+      "description": "Your instance client URL",
       "default": "https://cloud.kaneo.app",
       "required": true
     },
@@ -64,8 +64,8 @@
     {
       "name": "apiToken",
       "type": "textfield",
-      "title": "API Token",
-      "description": "Your API token",
+      "title": "Instance API Token",
+      "description": "Your instance API token",
       "required": true
     },
     {
