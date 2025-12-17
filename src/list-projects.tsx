@@ -34,9 +34,9 @@ const formatShortDate = (date: string | null) => {
 const cleanDescription = (description: string) => {
   return description?.length
     ? description
-      .replace(/<p>/g, "")
-      .replace(/<\/p>/g, "\n")
-      .replace(/<br\s*\/?>/g, "\n")
+        .replace(/<p>/g, "")
+        .replace(/<\/p>/g, "\n")
+        .replace(/<br\s*\/?>/g, "\n")
     : "No description";
 };
 
@@ -634,37 +634,37 @@ function ProjectTasksList({ project }: { project: Project }) {
                     { text: item.assigneeName || "Unassigned", icon: Icon.Person },
                     ...(item.dueDate
                       ? [
-                        {
-                          tag: {
-                            value: formatShortDate(item.dueDate),
-                            color: (() => {
-                              const today = new Date();
-                              today.setHours(0, 0, 0, 0);
-                              const dueDate = new Date(item.dueDate);
-                              dueDate.setHours(0, 0, 0, 0);
+                          {
+                            tag: {
+                              value: formatShortDate(item.dueDate),
+                              color: (() => {
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+                                const dueDate = new Date(item.dueDate);
+                                dueDate.setHours(0, 0, 0, 0);
 
-                              const threeDaysFromNow = new Date(today);
-                              threeDaysFromNow.setDate(today.getDate() + 3);
+                                const threeDaysFromNow = new Date(today);
+                                threeDaysFromNow.setDate(today.getDate() + 3);
 
-                              if (dueDate < today) {
-                                return Color.Red;
-                              } else if (dueDate <= threeDaysFromNow) {
-                                return Color.Orange;
-                              } else {
-                                return Color.Green;
-                              }
-                            })(),
+                                if (dueDate < today) {
+                                  return Color.Red;
+                                } else if (dueDate <= threeDaysFromNow) {
+                                  return Color.Orange;
+                                } else {
+                                  return Color.Green;
+                                }
+                              })(),
+                            },
+                            tooltip: "Due Date",
                           },
-                          tooltip: "Due Date",
-                        },
-                      ]
+                        ]
                       : []),
                     {
                       tag: priorityRaw
                         ? {
-                          value: capitalize(priorityRaw).replaceAll("-", " "),
-                          color: priorityColor[priorityRaw],
-                        }
+                            value: capitalize(priorityRaw).replaceAll("-", " "),
+                            color: priorityColor[priorityRaw],
+                          }
                         : undefined,
                       tooltip: "Priority",
                     },
