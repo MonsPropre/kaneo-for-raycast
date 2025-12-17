@@ -69,4 +69,29 @@ interface Notification {
   createdAt: string;
 }
 
-export type { Project, Task, ProjectDetail, Users, Member, UserDetail, Column, Notification };
+interface CreateTaskFormValues {
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  dueDate: Date | null;
+  projectId: string;
+}
+
+interface CreateProjectFormValues {
+  name: string;
+  slug: string;
+}
+
+export type {
+  Project,
+  Task,
+  ProjectDetail,
+  Users,
+  Member,
+  UserDetail,
+  Column,
+  Notification,
+  CreateTaskFormValues,
+  CreateProjectFormValues,
+};

@@ -17,7 +17,7 @@ import {
 } from "@raycast/api";
 import { useFetch, useForm, FormValidation } from "@raycast/utils";
 import { ChangeStatus, ChangePriority, CopyTaskTitle, CopyTaskDescription, CopyProjectName } from "./shortcut";
-import { Project, Task, ProjectDetail } from "./types";
+import { Project, Task, ProjectDetail, CreateProjectFormValues, CreateTaskFormValues } from "./types";
 
 function formatDate(date: string | null) {
   if (!date) return "N/A";
@@ -34,9 +34,9 @@ const formatShortDate = (date: string | null) => {
 const cleanDescription = (description: string) => {
   return description?.length
     ? description
-        .replace(/<p>/g, "")
-        .replace(/<\/p>/g, "\n")
-        .replace(/<br\s*\/?>/g, "\n")
+      .replace(/<p>/g, "")
+      .replace(/<\/p>/g, "\n")
+      .replace(/<br\s*\/?>/g, "\n")
     : "No description";
 };
 
@@ -75,20 +75,6 @@ const priorityColor: Record<string, string> = {
   high: "#ff8904",
   urgent: "#ff5252",
 };
-
-interface CreateTaskFormValues {
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  dueDate: Date | null;
-  projectId: string;
-}
-
-interface CreateProjectFormValues {
-  name: string;
-  slug: string;
-}
 
 // Formulaire de création de projet
 function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void }) {
@@ -238,6 +224,14 @@ function CreateTaskForm({
     },
   });
 
+  const priorityOptions = [
+    { value: "no-priority", title: "No Priority" },
+    { value: "low", title: "Low" },
+    { value: "medium", title: "Medium" },
+    { value: "high", title: "High" },
+    { value: "urgent", title: "Urgent" },
+  ];
+
   return (
     <Form
       actions={
@@ -254,11 +248,9 @@ function CreateTaskForm({
         ))}
       </Form.Dropdown>
       <Form.Dropdown title="Priority" {...itemProps.priority}>
-        <Form.Dropdown.Item value="no-priority" title="No priority" />
-        <Form.Dropdown.Item value="low" title="Low" />
-        <Form.Dropdown.Item value="medium" title="Medium" />
-        <Form.Dropdown.Item value="high" title="High" />
-        <Form.Dropdown.Item value="urgent" title="Urgent" />
+        {priorityOptions.map((option) => (
+          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
+        ))}
       </Form.Dropdown>
       <Form.Dropdown title="Project" {...itemProps.projectId}>
         <Form.Dropdown.Item title="No project" value="" icon={Icon.List} />
@@ -642,37 +634,37 @@ function ProjectTasksList({ project }: { project: Project }) {
                     { text: item.assigneeName || "Unassigned", icon: Icon.Person },
                     ...(item.dueDate
                       ? [
-                          {
-                            tag: {
-                              value: formatShortDate(item.dueDate),
-                              color: (() => {
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
-                                const dueDate = new Date(item.dueDate);
-                                dueDate.setHours(0, 0, 0, 0);
+                        {
+                          tag: {
+                            value: formatShortDate(item.dueDate),
+                            color: (() => {
+                              const today = new Date();
+                              today.setHours(0, 0, 0, 0);
+                              const dueDate = new Date(item.dueDate);
+                              dueDate.setHours(0, 0, 0, 0);
 
-                                const threeDaysFromNow = new Date(today);
-                                threeDaysFromNow.setDate(today.getDate() + 3);
+                              const threeDaysFromNow = new Date(today);
+                              threeDaysFromNow.setDate(today.getDate() + 3);
 
-                                if (dueDate < today) {
-                                  return Color.Red;
-                                } else if (dueDate <= threeDaysFromNow) {
-                                  return Color.Orange;
-                                } else {
-                                  return Color.Green;
-                                }
-                              })(),
-                            },
-                            tooltip: "Due Date",
+                              if (dueDate < today) {
+                                return Color.Red;
+                              } else if (dueDate <= threeDaysFromNow) {
+                                return Color.Orange;
+                              } else {
+                                return Color.Green;
+                              }
+                            })(),
                           },
-                        ]
+                          tooltip: "Due Date",
+                        },
+                      ]
                       : []),
                     {
                       tag: priorityRaw
                         ? {
-                            value: capitalize(priorityRaw).replaceAll("-", " "),
-                            color: priorityColor[priorityRaw],
-                          }
+                          value: capitalize(priorityRaw).replaceAll("-", " "),
+                          color: priorityColor[priorityRaw],
+                        }
                         : undefined,
                       tooltip: "Priority",
                     },
