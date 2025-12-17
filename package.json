@@ -55,17 +55,17 @@
       "required": true
     },
     {
-      "name": "workspaceId",
-      "type": "textfield",
-      "title": "Workspace ID",
-      "description": "Your workspace ID",
-      "required": true
-    },
-    {
       "name": "apiToken",
       "type": "textfield",
       "title": "API Token",
       "description": "Your instance API token",
+      "required": true
+    },
+    {
+      "name": "workspaceId",
+      "type": "textfield",
+      "title": "Workspace ID",
+      "description": "Your workspace ID",
       "required": true
     },
     {
