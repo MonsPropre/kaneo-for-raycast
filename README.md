@@ -12,6 +12,7 @@ A Raycast extension for managing your Kaneo projects and tasks directly from Ray
 
 - **Browse Projects**: View all your Kaneo projects with task counts and completion percentages
 - **Create Task**: Create a new task from Raycast
+- **Browse Notifications**: View all your Kaneo notifications
 - **Task Management**: Organize tasks by status columns (Backlog, To Do, In Progress, In Review, Done)
 - **Status Updates**: Change task status with keyboard shortcuts
 - **Priority Sorting**: Sort tasks by priority (urgent → high → medium → low) or due date
