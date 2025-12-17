@@ -1,8 +1,14 @@
-# Kaneo for Raycast
+<div align="center">
+   <img
+      src="assets/kaneo.png"
+      alt="Kaneo for Raycast"
+      width="128"
+   />
 
 ⚠️ **This extension is not created, maintained or supported by Kaneo.**
 
 A Raycast extension for managing your Kaneo projects and tasks directly from Raycast.
+</div>
 
 ## Features
 
