@@ -40,7 +40,6 @@ const cleanDescription = (description: string) => {
     : "No description";
 };
 
-// Icônes pour colonnes / statuts
 const columnIcons = {
   backlog: Icon.CircleEllipsis,
   "to-do": Icon.CircleEllipsis,
@@ -49,7 +48,6 @@ const columnIcons = {
   done: Icon.CheckCircle,
 } as const;
 
-// Raccourcis pour statuts
 const statusKey: Record<string, Keyboard.KeyEquivalent> = {
   backlog: "b",
   "to-do": "t",
@@ -58,7 +56,6 @@ const statusKey: Record<string, Keyboard.KeyEquivalent> = {
   done: "d",
 };
 
-// Raccourcis pour priorités
 const priorityKey: Record<string, Keyboard.KeyEquivalent> = {
   "no-priority": "n",
   low: "l",
@@ -67,7 +64,6 @@ const priorityKey: Record<string, Keyboard.KeyEquivalent> = {
   urgent: "u",
 };
 
-// Priorités (affichage + couleurs)
 const priorityColor: Record<string, string> = {
   "no-priority": "#a0989a",
   low: "#51a2ff",
@@ -76,7 +72,6 @@ const priorityColor: Record<string, string> = {
   urgent: "#ff5252",
 };
 
-// Formulaire de création de projet
 function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void }) {
   const { pop } = useNavigation();
   const { instanceUrl, apiToken, workspaceId } = getPreferenceValues<{
@@ -149,7 +144,6 @@ function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void 
   );
 }
 
-// Formulaire de création de tâche
 function CreateTaskForm({
   projectId,
   columnStatuses,
@@ -247,7 +241,6 @@ function CreateTaskForm({
   );
 }
 
-// Detail view pour une tâche avec fetch de la tâche
 function TaskDetailView({
   taskId,
   projectId,
@@ -270,7 +263,6 @@ function TaskDetailView({
     workspaceId: string;
   }>();
 
-  // Fetch la tâche directement pour avoir les données à jour
   const {
     isLoading,
     data: task,
@@ -317,15 +309,14 @@ ${formatDate(task.createdAt)}
     return webUrl.toString();
   };
 
-  // Wrapper pour revalider le détail après update
   const handleStatusUpdate = async (taskId: string, newStatus: string, taskTitle: string) => {
     await onStatusUpdate(taskId, newStatus, taskTitle);
-    await revalidate(); // Rafraîchit le détail
+    await revalidate();
   };
 
   const handlePriorityUpdate = async (taskId: string, newPriority: string, taskTitle: string) => {
     await onPriorityUpdate(taskId, newPriority, taskTitle);
-    await revalidate(); // Rafraîchit le détail
+    await revalidate();
   };
 
   return (
@@ -347,7 +338,6 @@ ${formatDate(task.createdAt)}
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Kaneo Web" url={openTask()} />
 
-          {/* Change Status... */}
           <ActionPanel.Submenu title="Change Status…" icon={Icon.List} shortcut={ChangeStatus}>
             {columnStatuses
               .filter((status) => status.id !== task.status)
@@ -367,7 +357,6 @@ ${formatDate(task.createdAt)}
               ))}
           </ActionPanel.Submenu>
 
-          {/* Change Priority... */}
           <ActionPanel.Submenu title="Change Priority…" icon={Icon.List} shortcut={ChangePriority}>
             {columnPriorities
               .filter((priority) => priority.id !== (task.priority || "no-priority"))
@@ -399,7 +388,6 @@ ${formatDate(task.createdAt)}
   );
 }
 
-// Liste des tâches d'un projet
 function ProjectTasksList({ project }: { project: Project }) {
   const { instanceUrl, apiToken, sort } = getPreferenceValues<{
     instanceUrl: string;
@@ -693,7 +681,6 @@ function ProjectTasksList({ project }: { project: Project }) {
                         shortcut={Keyboard.Shortcut.Common.Remove}
                       />
 
-                      {/* Change Status... */}
                       <ActionPanel.Submenu title="Change Status…" icon={Icon.List} shortcut={ChangeStatus}>
                         {columnStatuses
                           .filter((status) => status.id !== item.status)
@@ -714,7 +701,6 @@ function ProjectTasksList({ project }: { project: Project }) {
                           ))}
                       </ActionPanel.Submenu>
 
-                      {/* Change Priority... */}
                       <ActionPanel.Submenu title="Change Priority…" icon={Icon.List} shortcut={ChangePriority}>
                         {columnPriorities
                           .filter((priority) => priority.id !== (item.priority || "no-priority"))
