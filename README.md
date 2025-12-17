@@ -36,8 +36,8 @@ Before using the extension, you need to configure the following preferences:
 
 | Preference                                                                    | Description                                   | Required | Default                 |
 |-------------------------------------------------------------------------------|-----------------------------------------------|----------|-------------------------|
-| **Instance URL**                                                              | Your Kaneo API instance URL                   | Yes      | https://cloud.kaneo.app |
-| **Web Instance URL**                                                          | Your Kaneo web application URL                | Yes      | https://cloud.kaneo.app |
+| **Instance URL**                                                              | Your Kaneo instance API URL                   | Yes      | https://cloud.kaneo.app |
+| **Web Instance URL**                                                          | Your Kaneo instance Client URL                | Yes      | https://cloud.kaneo.app |
 | **Workspace ID**                                                              | Your Kaneo workspace ID                       | Yes      | N/A                     |
 | [**API Token**](https://cloud.kaneo.app/dashboard/settings/account/developer) | Your authentication token                     | Yes      | N/A                     |
 | **User ID**                                                                   | Your user ID (for task assignments)           | No       | N/A                     |
