@@ -4,8 +4,6 @@ import { CreateTaskFormValues, Project } from "./types";
 
 export default function Command() {
   const { instanceUrl, apiToken, workspaceId } = getPreferenceValues();
-  const apiUrl = new URL(instanceUrl);
-  apiUrl.pathname = `/api`;
 
   const projectsUrl = `${instanceUrl}/api/project?workspaceId=${workspaceId}`;
   const { isLoading, data: projects = [] } = useFetch<Project[]>(projectsUrl, {
@@ -18,8 +16,7 @@ export default function Command() {
   const { handleSubmit, itemProps } = useForm<CreateTaskFormValues>({
     onSubmit: async (values) => {
       try {
-        apiUrl.pathname = `/task/${values.projectId}`;
-        const response = await fetch(apiUrl.toString(), {
+        const response = await fetch(`${instanceUrl}/api/task/${values.projectId}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
