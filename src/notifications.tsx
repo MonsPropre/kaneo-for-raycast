@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { Notification } from "./types";
@@ -95,6 +95,34 @@ export default function Command() {
         }
     };
 
+    const clearNotifications = async () => {
+        const confirm = await confirmAlert({
+            title: "Clear notifications",
+            message: "Are you sure you want to clear all notifications?"
+        });
+
+        if (!confirm) return;
+
+        const url = new URL(apiUrl);
+        url.pathname = `/api/notification/clear-all`;
+        try {
+            const res = await fetch(url.toString(), {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${apiToken}`,
+                },
+            });
+            if (!res.ok) {
+                return showToast(Toast.Style.Failure, "Failed to clear notifications");
+            }
+            await revalidate();
+            return showToast(Toast.Style.Success, "All notifications cleared");
+        } catch (error) {
+            return showToast(Toast.Style.Failure, "Failed to clear notifications");
+        }
+    };
+
     return (
         <List isLoading={isLoading}>
             <List.EmptyView title="No notifications" />
@@ -121,6 +149,20 @@ export default function Command() {
                                     macOS: {
                                         modifiers: ["cmd", "shift"],
                                         key: "r"
+                                    }
+                                }}
+                            />
+                            <Action
+                                title="Clear notifications"
+                                onAction={() => clearNotifications()}
+                                shortcut={{
+                                    Windows: {
+                                        modifiers: ["ctrl", "shift"],
+                                        key: "d"
+                                    },
+                                    macOS: {
+                                        modifiers: ["cmd", "shift"],
+                                        key: "d"
                                     }
                                 }}
                             />
