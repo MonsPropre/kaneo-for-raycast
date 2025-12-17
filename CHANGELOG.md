@@ -2,4 +2,4 @@
 
 ## [Added Kaneo] - {PR_MERGE_DATE}
 
-Initial version code
+Added Kaneo extension
