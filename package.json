@@ -56,7 +56,7 @@
     },
     {
       "name": "apiToken",
-      "type": "textfield",
+      "type": "password",
       "title": "API Token",
       "description": "Your instance API token",
       "required": true
