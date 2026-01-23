@@ -1,41 +1,27 @@
 import { ActionPanel, Action, Form, getPreferenceValues, Icon, PopToRootType, showHUD } from "@raycast/api";
-import { FormValidation, useFetch, useForm } from "@raycast/utils";
-import { CreateTaskFormValues, Project } from "./types";
+import { FormValidation, useForm, usePromise } from "@raycast/utils";
+import { CreateTaskFormValues } from "./types";
+import { KaneoAPI } from "./api/kaneo";
 
 export default function Command() {
-  const { instanceUrl, apiToken, workspaceId } = getPreferenceValues();
+  const { workspaceId } = getPreferenceValues();
+  const kaneoApi = new KaneoAPI();
 
-  const projectsUrl = `${instanceUrl}/api/project?workspaceId=${workspaceId}`;
-  const { isLoading, data: projects = [] } = useFetch<Project[]>(projectsUrl, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiToken}`,
-    },
-  });
+  const { isLoading, data: projects = [] } = usePromise(
+    (workspaceId: string) => kaneoApi.getProjects(workspaceId),
+    [workspaceId],
+  );
 
   const { handleSubmit, itemProps } = useForm<CreateTaskFormValues>({
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${instanceUrl}/api/task/${values.projectId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiToken}`,
-          },
-          body: JSON.stringify({
-            projectId: values.projectId,
-            title: values.title,
-            description: values.description || "",
-            dueDate: values.dueDate || "",
-            priority: values.priority || "no-priority",
-            status: "to-do",
-          }),
+        await kaneoApi.createTask(values.projectId, {
+          title: values.title,
+          description: values.description || "",
+          ...(values.dueDate && { dueDate: values.dueDate.toISOString() }),
+          priority: values.priority || "no-priority",
+          status: "to-do",
         });
-
-        if (!response.ok) {
-          const { message } = await response.json();
-          throw new Error(message || `HTTP error! status: ${response.status}`);
-        }
 
         await showHUD("Task created successfully!", { popToRootType: PopToRootType.Immediate });
       } catch (error) {

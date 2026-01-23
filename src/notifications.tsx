@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
-import { getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { Notification } from "./types";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { KaneoAPI } from "./api/kaneo";
 
 const rtf = new Intl.RelativeTimeFormat("en", { numeric: "always" });
 
@@ -29,19 +28,9 @@ function getRelativeTimeString(date: string) {
 }
 
 export default function Command() {
-  const { instanceUrl, apiToken } = getPreferenceValues();
-  const apiUrl = new URL(instanceUrl);
-  apiUrl.pathname = "/api/notification";
-  const {
-    isLoading,
-    data: notifications = [],
-    revalidate,
-  } = useFetch<Notification[]>(apiUrl.toString(), {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiToken}`,
-    },
-  });
+  const api = new KaneoAPI();
+
+  const { isLoading, data: notifications = [], revalidate } = usePromise(() => api.getNotifications(), []);
 
   const typeIcon: Record<string, Icon> = {
     task: Icon.CheckList,
@@ -58,46 +47,28 @@ export default function Command() {
   });
 
   const markNotificationAsRead = async (notificationId: string) => {
-    const url = new URL(apiUrl);
-    url.pathname = `/api/notification/${notificationId}/read`;
     try {
-      const res = await fetch(url.toString(), {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-      });
-      if (!res.ok) {
-        return showToast(Toast.Style.Failure, "Failed to mark notification as read");
-      }
+      await api.markNotificationRead(notificationId);
       await revalidate();
-      return showToast(Toast.Style.Success, "Notification marked as read");
+      await showToast(Toast.Style.Success, "Notification marked as read");
     } catch (error) {
-      console.error(error);
-      return showToast(Toast.Style.Failure, "Failed to mark notification as read");
+      await showFailureToast(error, {
+        title: "Failed to mark notification as read",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 
   const markAllNotificationsAsRead = async () => {
-    const url = new URL(apiUrl);
-    url.pathname = `/api/notification/read-all`;
     try {
-      const res = await fetch(url.toString(), {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-      });
-      if (!res.ok) {
-        return showToast(Toast.Style.Failure, "Failed to mark all notifications as read");
-      }
+      await api.markAllNotificationsRead();
       await revalidate();
-      return showToast(Toast.Style.Success, "All notifications marked as read");
+      await showToast(Toast.Style.Success, "All notifications marked as read");
     } catch (error) {
-      console.error(error);
-      return showToast(Toast.Style.Failure, "Failed to mark all notifications as read");
+      await showFailureToast(error, {
+        title: "Failed to mark all notifications as read",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 
@@ -109,24 +80,15 @@ export default function Command() {
 
     if (!confirm) return;
 
-    const url = new URL(apiUrl);
-    url.pathname = `/api/notification/clear-all`;
     try {
-      const res = await fetch(url.toString(), {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-      });
-      if (!res.ok) {
-        return showToast(Toast.Style.Failure, "Failed to clear notifications");
-      }
+      await api.clearNotifications();
       await revalidate();
-      return showToast(Toast.Style.Success, "All notifications cleared");
+      await showToast(Toast.Style.Success, "All notifications cleared");
     } catch (error) {
-      console.error(error);
-      return showToast(Toast.Style.Failure, "Failed to clear notifications");
+      await showFailureToast(error, {
+        title: "Failed to clear notifications",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 
@@ -156,6 +118,7 @@ export default function Command() {
                   },
                 }}
               />
+
               <Action
                 title="Clear Notifications"
                 onAction={() => clearNotifications()}

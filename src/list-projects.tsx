@@ -15,9 +15,10 @@ import {
   Form,
   useNavigation,
 } from "@raycast/api";
-import { useFetch, useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation, showFailureToast, usePromise } from "@raycast/utils";
 import { ChangeStatus, ChangePriority, CopyTaskTitle, CopyTaskDescription, CopyProjectName } from "./shortcut";
-import { Project, Task, ProjectDetail, CreateProjectFormValues, CreateTaskFormValues } from "./types";
+import { Project, Task, CreateProjectFormValues, CreateTaskFormValues } from "./types";
+import { KaneoAPI } from "./api/kaneo";
 
 function formatDate(date: string | null) {
   if (!date) return "N/A";
@@ -65,56 +66,36 @@ const priorityKey: Record<string, Keyboard.KeyEquivalent> = {
 };
 
 const priorityColor: Record<string, string> = {
-  "no-priority": "#a0989a",
-  low: "#51a2ff",
-  medium: "#ffb900",
-  high: "#ff8904",
-  urgent: "#ff5252",
+  "no-priority": Color.SecondaryText,
+  low: Color.Blue,
+  medium: Color.Yellow,
+  high: Color.Orange,
+  urgent: Color.Red,
 };
 
 function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void }) {
   const { pop } = useNavigation();
-  const { instanceUrl, apiToken, workspaceId } = getPreferenceValues<{
-    instanceUrl: string;
-    apiToken: string;
-    workspaceId: string;
-  }>();
+  const api = new KaneoAPI();
 
   const { handleSubmit, itemProps, setValue } = useForm<CreateProjectFormValues>({
     async onSubmit(values) {
-      const toast = await showToast({
+      await showToast({
         style: Toast.Style.Animated,
         title: "Creating project...",
       });
 
       try {
-        const response = await fetch(`${instanceUrl}/api/project`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiToken}`,
-          },
-          body: JSON.stringify({
-            name: values.name,
-            slug: values.slug,
-            icon: "",
-            workspaceId: workspaceId,
-          }),
-        });
+        await api.createProject({ name: values.name, slug: values.slug, icon: "" });
 
-        if (!response.ok) {
-          throw new Error(`Failed to create project: ${response.statusText}`);
-        }
-
-        toast.style = Toast.Style.Success;
-        toast.title = "Project created successfully";
+        showToast(Toast.Style.Success, "Project created successfully");
 
         onProjectCreated();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed to create project";
-        toast.message = error instanceof Error ? error.message : "Unknown error";
+        showFailureToast(error, {
+          title: "Failed to create project",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     },
     validation: {
@@ -154,47 +135,33 @@ function CreateTaskForm({
   onTaskCreated: () => void;
 }) {
   const { pop } = useNavigation();
-  const { instanceUrl, apiToken } = getPreferenceValues<{
-    instanceUrl: string;
-    apiToken: string;
-  }>();
+  const kaneoApi = new KaneoAPI();
 
   const { handleSubmit, itemProps } = useForm<CreateTaskFormValues>({
     async onSubmit(values) {
-      const toast = await showToast({
+      await showToast({
         style: Toast.Style.Animated,
         title: "Creating task...",
       });
 
       try {
-        const response = await fetch(`${instanceUrl}/api/task/${projectId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiToken}`,
-          },
-          body: JSON.stringify({
-            title: values.title,
-            description: values.description || "",
-            status: values.status,
-            priority: values.priority || "no-priority",
-            ...(values.dueDate && { dueDate: values.dueDate.toISOString() }),
-          }),
+        await kaneoApi.createTask(projectId, {
+          title: values.title,
+          description: values.description || "",
+          status: values.status,
+          priority: values.priority || "no-priority",
+          ...(values.dueDate && { dueDate: values.dueDate.toISOString() }),
         });
 
-        if (!response.ok) {
-          throw new Error(`Failed to create task: ${response.statusText}`);
-        }
-
-        toast.style = Toast.Style.Success;
-        toast.title = "Task created successfully";
+        showToast(Toast.Style.Success, "Task created successfully");
 
         onTaskCreated();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed to create task";
-        toast.message = error instanceof Error ? error.message : "Unknown error";
+        showFailureToast(error, {
+          title: "Failed to create task",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     },
     initialValues: {
@@ -256,23 +223,15 @@ function TaskDetailView({
   onStatusUpdate: (taskId: string, newStatus: string, taskTitle: string) => Promise<void>;
   onPriorityUpdate: (taskId: string, newPriority: string, taskTitle: string) => Promise<void>;
 }) {
-  const { instanceUrl, apiToken, webInstanceUrl, workspaceId } = getPreferenceValues<{
+  const api = new KaneoAPI();
+  const { webInstanceUrl, workspaceId } = getPreferenceValues<{
     instanceUrl: string;
     apiToken: string;
     webInstanceUrl: string;
     workspaceId: string;
   }>();
 
-  const {
-    isLoading,
-    data: task,
-    revalidate,
-  } = useFetch<Task>(`${instanceUrl}/api/task/${taskId}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiToken}`,
-    },
-  });
+  const { isLoading, data: task, revalidate } = usePromise((id: string) => api.getTask(id), [taskId]);
 
   if (isLoading || !task) {
     return <Detail isLoading markdown="Loading task..." />;
@@ -389,22 +348,15 @@ ${formatDate(task.createdAt)}
 }
 
 function ProjectTasksList({ project }: { project: Project }) {
-  const { instanceUrl, apiToken, sort } = getPreferenceValues<{
-    instanceUrl: string;
-    apiToken: string;
+  const api = new KaneoAPI();
+  const { sort } = getPreferenceValues<{
     sort: string;
   }>();
-
   const {
     isLoading,
     data: projectDetail,
     revalidate,
-  } = useFetch<ProjectDetail>(`${instanceUrl}/api/task/tasks/${project.id}`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiToken}`,
-    },
-  });
+  } = usePromise((id: string) => api.getProjectTasks(id), [project.id.toString()]);
 
   const priorityOrder = ["urgent", "high", "medium", "low", "no-priority"];
 
@@ -432,77 +384,44 @@ function ProjectTasksList({ project }: { project: Project }) {
   };
 
   const updateTaskStatus = async (taskId: string, newStatus: string, taskTitle: string) => {
-    const toast = await showToast({
+    await showToast({
       style: Toast.Style.Animated,
       title: "Updating task status...",
     });
 
     try {
-      const statusUrl = new URL(instanceUrl);
-      statusUrl.pathname = `/api/task/status/${taskId}`;
+      await api.updateTaskStatus(taskId, newStatus);
 
-      const response = await fetch(statusUrl.toString(), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-        body: JSON.stringify({
-          status: newStatus,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update task status: ${response.statusText}`);
-      }
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Task status updated";
-      toast.message = `"${taskTitle}" moved to ${newStatus}`;
+      showToast(Toast.Style.Success, "Task status updated", `"${taskTitle}" moved to ${newStatus}`);
 
       await revalidate();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to update task status";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      await showFailureToast(error, {
+        title: "Failed to update task status",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 
   const updateTaskPriority = async (taskId: string, newPriority: string, taskTitle: string) => {
-    const toast = await showToast({
+    await showToast({
       style: Toast.Style.Animated,
       title: "Updating task priority...",
     });
 
     try {
-      const priorityUrl = new URL(instanceUrl);
-      priorityUrl.pathname = `/api/task/priority/${taskId}`;
+      await api.updateTaskPriority(taskId, newPriority);
 
-      const response = await fetch(priorityUrl.toString(), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-        body: JSON.stringify({
-          priority: newPriority,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update task priority: ${response.statusText}`);
-      }
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Task priority updated";
-      toast.message = `"${taskTitle}" set to ${newPriority}`;
+      showToast(Toast.Style.Success, "Task priority updated", `"${taskTitle}" set to ${newPriority}`);
 
       await revalidate();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to update task priority";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      await showFailureToast(error, {
+        title: "Failed to update task priority",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     }
+    await revalidate();
   };
 
   const deleteTask = async (taskId: string, taskTitle: string) => {
@@ -517,35 +436,22 @@ function ProjectTasksList({ project }: { project: Project }) {
 
     if (!confirmed) return;
 
-    const toast = await showToast({
+    await showToast({
       style: Toast.Style.Animated,
       title: "Deleting task...",
     });
 
     try {
-      const deleteUrl = new URL(instanceUrl);
-      deleteUrl.pathname = `/api/task/${taskId}`;
+      await api.deleteTask(taskId);
 
-      const response = await fetch(deleteUrl.toString(), {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete task: ${response.statusText}`);
-      }
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Task deleted";
+      showToast(Toast.Style.Success, "Task deleted", `"${taskTitle}" deleted`);
 
       await revalidate();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to delete task";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      await showFailureToast(error, {
+        title: "Failed to delete task",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 
@@ -740,27 +646,17 @@ function ProjectTasksList({ project }: { project: Project }) {
 }
 
 export default function Command() {
-  const { instanceUrl, apiToken, workspaceId } = getPreferenceValues<{
-    instanceUrl: string;
-    apiToken: string;
+  const api = new KaneoAPI();
+  const { workspaceId } = getPreferenceValues<{
     workspaceId: string;
   }>();
-
-  const apiUrl = new URL(instanceUrl);
-  apiUrl.pathname = "/api/project";
-  apiUrl.searchParams.set("workspaceId", workspaceId);
 
   const {
     isLoading,
     data: projects = [],
     error,
     revalidate,
-  } = useFetch<Project[]>(apiUrl.toString(), {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiToken}`,
-    },
-  });
+  } = usePromise((workspaceId: string) => api.getProjects(workspaceId), [workspaceId]);
 
   if (error) {
     const isUnauthorized = error.message.includes("Unauthorized") || error.message.includes("401");
@@ -804,26 +700,17 @@ export default function Command() {
     });
 
     try {
-      const response = await fetch(`${instanceUrl}/api/project/${projectId}?workspaceId=${workspaceId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete project: ${response.statusText}`);
-      }
+      await api.deleteProject(projectId);
 
       toast.style = Toast.Style.Success;
-      toast.title = "Project successfully deleted";
+      toast.title = "Project deleted";
 
       await revalidate();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to delete project";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      await showFailureToast(error, {
+        title: "Failed to delete project",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 
