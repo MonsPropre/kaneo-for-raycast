@@ -41,14 +41,6 @@ const cleanDescription = (description: string) => {
     : "No description";
 };
 
-const columnIcons = {
-  backlog: Icon.CircleEllipsis,
-  "to-do": Icon.CircleEllipsis,
-  "in-progress": Icon.CircleProgress25,
-  "in-review": Icon.CheckList,
-  done: Icon.CheckCircle,
-} as const;
-
 const statusKey: Record<string, Keyboard.KeyEquivalent> = {
   backlog: "b",
   "to-do": "t",
@@ -218,7 +210,11 @@ function TaskDetailView({
 }: {
   taskId: string;
   projectId: string;
-  columnStatuses: Array<{ id: string; name: string }>;
+  columnStatuses: Array<{
+    isDone: boolean;
+    id: string;
+    name: string;
+  }>;
   columnPriorities: Array<{ id: string; name: string }>;
   onStatusUpdate: (taskId: string, newStatus: string, taskTitle: string) => Promise<void>;
   onPriorityUpdate: (taskId: string, newPriority: string, taskTitle: string) => Promise<void>;
@@ -300,20 +296,24 @@ ${formatDate(task.createdAt)}
           <ActionPanel.Submenu title="Change Status…" icon={Icon.List} shortcut={ChangeStatus}>
             {columnStatuses
               .filter((status) => status.id !== task.status)
-              .map((status) => (
-                <Action
-                  key={status.id}
-                  icon={
-                    columnIcons[status.name.toLowerCase().replace(" ", "-") as keyof typeof columnIcons] || Icon.Circle
-                  }
-                  shortcut={{
-                    Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] ?? "s" },
-                    macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] ?? "s" },
-                  }}
-                  title={status.name}
-                  onAction={() => handleStatusUpdate(task.id, status.id, task.title)}
-                />
-              ))}
+              .map((status) => {
+                return (
+                  <Action
+                    key={status.id}
+                    icon={status.isDone ? Icon.CircleProgress100 : Icon.Circle}
+                    shortcut={
+                      statusKey[status.id]
+                        ? {
+                            Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
+                            macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
+                          }
+                        : undefined
+                    }
+                    title={status.name}
+                    onAction={() => handleStatusUpdate(task.id, status.id, task.title)}
+                  />
+                );
+              })}
           </ActionPanel.Submenu>
 
           <ActionPanel.Submenu title="Change Priority…" icon={Icon.List} shortcut={ChangePriority}>
@@ -459,6 +459,7 @@ function ProjectTasksList({ project }: { project: Project }) {
     projectDetail?.columns.map((col) => ({
       id: col.id,
       name: col.name,
+      isDone: col.isFinal,
     })) || [];
 
   const columnPriorities: Array<{ id: string; name: string }> = [
@@ -506,7 +507,7 @@ function ProjectTasksList({ project }: { project: Project }) {
               return (
                 <List.Item
                   key={item.id}
-                  icon={columnIcons[column.name.toLowerCase().replace(" ", "-") as keyof typeof columnIcons]}
+                  icon={column.isFinal ? Icon.CircleProgress100 : Icon.Circle}
                   title={item.title}
                   accessories={[
                     { text: item.assigneeName || "Unassigned", icon: Icon.Person },
@@ -590,21 +591,24 @@ function ProjectTasksList({ project }: { project: Project }) {
                       <ActionPanel.Submenu title="Change Status…" icon={Icon.List} shortcut={ChangeStatus}>
                         {columnStatuses
                           .filter((status) => status.id !== item.status)
-                          .map((status) => (
-                            <Action
-                              key={status.id}
-                              icon={
-                                columnIcons[status.name.toLowerCase().replace(" ", "-") as keyof typeof columnIcons] ||
-                                Icon.Circle
-                              }
-                              shortcut={{
-                                Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] ?? "s" },
-                                macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] ?? "s" },
-                              }}
-                              title={status.name}
-                              onAction={() => updateTaskStatus(item.id, status.id, item.title)}
-                            />
-                          ))}
+                          .map((status) => {
+                            return (
+                              <Action
+                                key={status.id}
+                                icon={status.isDone ? Icon.CircleProgress100 : Icon.Circle}
+                                shortcut={
+                                  statusKey[status.id]
+                                    ? {
+                                        Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
+                                        macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
+                                      }
+                                    : undefined
+                                }
+                                title={status.name}
+                                onAction={() => updateTaskStatus(item.id, status.id, item.title)}
+                              />
+                            );
+                          })}
                       </ActionPanel.Submenu>
 
                       <ActionPanel.Submenu title="Change Priority…" icon={Icon.List} shortcut={ChangePriority}>
