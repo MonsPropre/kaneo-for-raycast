@@ -27,7 +27,7 @@ interface Task {
 }
 
 interface Column {
-  isFinal: string;
+  isFinal: boolean;
   id: string;
   name: string;
   tasks: Task[];
