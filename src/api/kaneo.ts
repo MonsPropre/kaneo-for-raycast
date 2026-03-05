@@ -17,7 +17,6 @@ export class KaneoAPI {
 
   private async request<T>(path: string, init?: RequestInit, timeoutMs = this.requestTimeout): Promise<T> {
     const url = `${this.instanceUrl.replace(/\/$/, "")}${path}`;
-    console.log(this.apiToken, path);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
