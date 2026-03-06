@@ -2,11 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { Session } from "../types";
 
-interface Preferences {
-  apiToken: string;
-  instanceUrl: string;
-}
-
 export function useAuthSession() {
   const prefs = getPreferenceValues<Preferences>();
   const [sessionData, setSessionData] = useCachedState<Session | null>("auth-session", null);
@@ -40,7 +35,7 @@ export function useAuthSession() {
         throw new Error("Unauthorized: invalid or expired API token");
       }
       if (!response.ok) {
-        throw new Error(`Erreur API: ${response.status}`);
+        throw new Error(`API Error: ${response.status}`);
       }
 
       const session = (await response.json()) as Session;
@@ -48,7 +43,7 @@ export function useAuthSession() {
       setSessionData(session);
       setLastToken(apiToken);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erreur inconnue";
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(errorMessage);
       setSessionData(null);
     } finally {
