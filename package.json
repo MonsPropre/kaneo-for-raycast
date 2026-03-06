@@ -87,6 +87,14 @@
       ]
     },
     {
+      "name": "youAsAssignee",
+      "type": "checkbox",
+      "label": "Assigned to you",
+      "description": "Display your name or \"You\" when task is assigned to you",
+      "required": false,
+      "default": true
+    },
+    {
       "name": "requestTimeout",
       "type": "dropdown",
       "title": "Request Timeout",

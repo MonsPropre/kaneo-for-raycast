@@ -51,6 +51,16 @@ export class KaneoAPI {
     }
   }
 
+  async assignTask(taskId: string, assigneeId: string | null) {
+    return this.request<Task>(`/api/task/assignee/${taskId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: assigneeId }),
+    });
+  }
+
   async getProjects(workspaceId: string): Promise<Project[]> {
     return this.request<Project[]>(`/api/project?workspaceId=${workspaceId}`);
   }
