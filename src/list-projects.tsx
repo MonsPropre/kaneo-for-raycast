@@ -46,9 +46,9 @@ const formatShortDate = (date: string | null) => {
 const cleanDescription = (description: string) => {
   return description?.length
     ? description
-      .replace(/<p>/g, "")
-      .replace(/<\/p>/g, "\n")
-      .replace(/<br\s*\/?>/g, "\n")
+        .replace(/<p>/g, "")
+        .replace(/<\/p>/g, "\n")
+        .replace(/<br\s*\/?>/g, "\n")
     : "No description";
 };
 
@@ -316,9 +316,9 @@ ${formatDate(task.createdAt)}
                     shortcut={
                       statusKey[status.id]
                         ? {
-                          Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
-                          macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
-                        }
+                            Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
+                            macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
+                          }
                         : undefined
                     }
                     title={status.name}
@@ -415,11 +415,11 @@ function ProjectTasksList({ project }: { project: Project }) {
             tasks: col.tasks.map((t) =>
               t.id === task.id
                 ? {
-                  ...t,
-                  assigneeId: newAssigneeId,
-                  assigneeName: newAssigneeName,
-                  assigneeImage: newAssigneeImage,
-                }
+                    ...t,
+                    assigneeId: newAssigneeId,
+                    assigneeName: newAssigneeName,
+                    assigneeImage: newAssigneeImage,
+                  }
                 : t,
             ),
           })),
@@ -604,37 +604,37 @@ function ProjectTasksList({ project }: { project: Project }) {
                     },
                     ...(item.dueDate
                       ? [
-                        {
-                          tag: {
-                            value: formatShortDate(item.dueDate),
-                            color: (() => {
-                              const today = new Date();
-                              today.setHours(0, 0, 0, 0);
-                              const dueDate = new Date(item.dueDate);
-                              dueDate.setHours(0, 0, 0, 0);
+                          {
+                            tag: {
+                              value: formatShortDate(item.dueDate),
+                              color: (() => {
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+                                const dueDate = new Date(item.dueDate);
+                                dueDate.setHours(0, 0, 0, 0);
 
-                              const threeDaysFromNow = new Date(today);
-                              threeDaysFromNow.setDate(today.getDate() + 3);
+                                const threeDaysFromNow = new Date(today);
+                                threeDaysFromNow.setDate(today.getDate() + 3);
 
-                              if (dueDate < today) {
-                                return Color.Red;
-                              } else if (dueDate <= threeDaysFromNow) {
-                                return Color.Orange;
-                              } else {
-                                return Color.Green;
-                              }
-                            })(),
+                                if (dueDate < today) {
+                                  return Color.Red;
+                                } else if (dueDate <= threeDaysFromNow) {
+                                  return Color.Orange;
+                                } else {
+                                  return Color.Green;
+                                }
+                              })(),
+                            },
+                            tooltip: "Due Date",
                           },
-                          tooltip: "Due Date",
-                        },
-                      ]
+                        ]
                       : []),
                     {
                       tag: priorityRaw
                         ? {
-                          value: capitalize(priorityRaw).replaceAll("-", " "),
-                          color: priorityColor[priorityRaw],
-                        }
+                            value: capitalize(priorityRaw).replaceAll("-", " "),
+                            color: priorityColor[priorityRaw],
+                          }
                         : undefined,
                       tooltip: "Priority",
                     },
@@ -697,9 +697,9 @@ function ProjectTasksList({ project }: { project: Project }) {
                                 shortcut={
                                   statusKey[status.id]
                                     ? {
-                                      Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
-                                      macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
-                                    }
+                                        Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
+                                        macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
+                                      }
                                     : undefined
                                 }
                                 title={status.name}
