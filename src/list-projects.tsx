@@ -418,19 +418,39 @@ function ProjectTasksList({ project }: { project: Project }) {
 
         return {
           ...prev,
-          columns: prev.data.columns.map((col) => ({
-            ...col,
-            tasks: col.tasks.map((t) =>
-              t.id === task.id
-                ? {
-                    ...t,
-                    assigneeId: newAssigneeId,
-                    assigneeName: newAssigneeName,
-                    assigneeImage: newAssigneeImage,
-                  }
-                : t,
-            ),
-          })),
+          data: prev.data
+            ? {
+                ...prev.data,
+                columns: prev.data.columns.map((col) => ({
+                  ...col,
+                  tasks: col.tasks.map((t) =>
+                    t.id === task.id
+                      ? {
+                          ...t,
+                          assigneeId: newAssigneeId,
+                          assigneeName: newAssigneeName,
+                          assigneeImage: newAssigneeImage,
+                        }
+                      : t,
+                  ),
+                })),
+              }
+            : undefined,
+          columns: !prev.data
+            ? prev.columns?.map((col) => ({
+                ...col,
+                tasks: col.tasks.map((t) =>
+                  t.id === task.id
+                    ? {
+                        ...t,
+                        assigneeId: newAssigneeId,
+                        assigneeName: newAssigneeName,
+                        assigneeImage: newAssigneeImage,
+                      }
+                    : t,
+                ),
+              }))
+            : undefined,
         };
       });
 
@@ -543,7 +563,7 @@ function ProjectTasksList({ project }: { project: Project }) {
   };
 
   const columnStatuses =
-    (projectDetail?.data || projectDetail).columns.map((col) => ({
+    (projectDetail?.data || projectDetail)?.columns?.map((col) => ({
       id: col.id,
       name: col.name,
       isDone: col.isFinal,
@@ -582,7 +602,7 @@ function ProjectTasksList({ project }: { project: Project }) {
         </ActionPanel>
       }
     >
-      {(projectDetail?.data || projectDetail).columns.map((column) => {
+      {(projectDetail?.data || projectDetail)?.columns?.map((column) => {
         const tasks = sort === "priority" ? sortTasksByPriority(column.tasks) : sortTasksByDueDate(column.tasks);
 
         return (
