@@ -1,5 +1,9 @@
 # Kaneo Changelog
 
+## [Fix Project Detail] - {PR_MERGE_DATE}
+
+- Fix the project details fetch that fails for version 2.3.12 and above.
+
 ## [Assign Task] - {PR_MERGE_DATE}
 
 - Added "Assign to me" action for tasks

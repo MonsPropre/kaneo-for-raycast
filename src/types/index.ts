@@ -55,7 +55,9 @@ interface Column {
 }
 
 interface ProjectDetail extends Project {
-  columns: Column[];
+  data: {
+    columns: Column[];
+  };
 }
 
 interface UserDetail {
