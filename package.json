@@ -35,6 +35,13 @@
       "description": "List Kaneo notifications",
       "mode": "view",
       "subtitle": "Kaneo"
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Tasks",
+      "description": "List tasks assigned to you",
+      "mode": "view",
+      "subtitle": "Kaneo"
     }
   ],
   "preferences": [
