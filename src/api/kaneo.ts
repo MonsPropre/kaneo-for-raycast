@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import type { Project, ProjectDetail, Task, Notification, TaskRelation, Column } from "../types";
 import { normalizeInstanceUrl } from "../lib/url";
+import { getApiUrl } from "../lib/get-api-url";
 
 export class KaneoAPI {
   private instanceUrl: string;
@@ -17,7 +18,7 @@ export class KaneoAPI {
   }
 
   private async request<T>(path: string, init?: RequestInit, timeoutMs = this.requestTimeout): Promise<T> {
-    const url = `${this.instanceUrl}${path}`;
+    const url = getApiUrl(path);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);

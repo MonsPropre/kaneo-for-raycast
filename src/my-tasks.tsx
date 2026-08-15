@@ -195,11 +195,11 @@ export default function Command() {
                 accessories={[
                   ...(item.dueDate
                     ? [
-                        {
-                          tag: { value: formatShortDate(item.dueDate), color: dueDateColor(item.dueDate) },
-                          tooltip: "Due Date",
-                        },
-                      ]
+                      {
+                        tag: { value: formatShortDate(item.dueDate), color: dueDateColor(item.dueDate) },
+                        tooltip: "Due Date",
+                      },
+                    ]
                     : []),
                   {
                     tag: { value: capitalize(priorityRaw).replaceAll("-", " "), color: priorityColor[priorityRaw] },
@@ -238,9 +238,9 @@ export default function Command() {
                             shortcut={
                               statusKey[status.id]
                                 ? {
-                                    Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
-                                    macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
-                                  }
+                                  Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
+                                  macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
+                                }
                                 : undefined
                             }
                             title={status.name}

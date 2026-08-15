@@ -42,6 +42,7 @@ import {
   resolveColumns,
 } from "./lib/task-helpers";
 import { useEffect, useState } from "react";
+import { getApiUrl } from "./lib/get-api-url";
 
 function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void }) {
   const { pop } = useNavigation();
@@ -208,6 +209,8 @@ function ProjectTasksList({ project }: { project: Project }) {
   }
 
   const userId = session?.user?.id ?? null;
+
+  console.log(session?.user);
   const toggleAssignTask = async (task: Task) => {
     if (!userId) {
       await showToast({
@@ -239,36 +242,36 @@ function ProjectTasksList({ project }: { project: Project }) {
           ...prev,
           data: prev.data
             ? {
-                ...prev.data,
-                columns: prev.data.columns.map((col) => ({
-                  ...col,
-                  tasks: col.tasks.map((t) =>
-                    t.id === task.id
-                      ? {
-                          ...t,
-                          assigneeId: newAssigneeId,
-                          assigneeName: newAssigneeName,
-                          assigneeImage: newAssigneeImage,
-                        }
-                      : t,
-                  ),
-                })),
-              }
-            : undefined,
-          columns: !prev.data
-            ? prev.columns?.map((col) => ({
+              ...prev.data,
+              columns: prev.data.columns.map((col) => ({
                 ...col,
                 tasks: col.tasks.map((t) =>
                   t.id === task.id
                     ? {
-                        ...t,
-                        assigneeId: newAssigneeId,
-                        assigneeName: newAssigneeName,
-                        assigneeImage: newAssigneeImage,
-                      }
+                      ...t,
+                      assigneeId: newAssigneeId,
+                      assigneeName: newAssigneeName,
+                      assigneeImage: newAssigneeImage,
+                    }
                     : t,
                 ),
-              }))
+              })),
+            }
+            : undefined,
+          columns: !prev.data
+            ? prev.columns?.map((col) => ({
+              ...col,
+              tasks: col.tasks.map((t) =>
+                t.id === task.id
+                  ? {
+                    ...t,
+                    assigneeId: newAssigneeId,
+                    assigneeName: newAssigneeName,
+                    assigneeImage: newAssigneeImage,
+                  }
+                  : t,
+              ),
+            }))
             : undefined,
         };
       });
@@ -413,27 +416,27 @@ function ProjectTasksList({ project }: { project: Project }) {
                           : item.assigneeName) || "Unassigned",
                       icon: item.assigneeName
                         ? item.assigneeImage
-                          ? { source: item.assigneeImage, mask: Image.Mask.Circle }
+                          ? { source: getApiUrl(item.assigneeImage), mask: Image.Mask.Circle }
                           : getAvatarIcon(`${item.assigneeName}`)
                         : undefined,
                     },
                     ...(item.dueDate
                       ? [
-                          {
-                            tag: {
-                              value: formatShortDate(item.dueDate),
-                              color: dueDateColor(item.dueDate),
-                            },
-                            tooltip: "Due Date",
+                        {
+                          tag: {
+                            value: formatShortDate(item.dueDate),
+                            color: dueDateColor(item.dueDate),
                           },
-                        ]
+                          tooltip: "Due Date",
+                        },
+                      ]
                       : []),
                     {
                       tag: priorityRaw
                         ? {
-                            value: capitalize(priorityRaw).replaceAll("-", " "),
-                            color: priorityColor[priorityRaw],
-                          }
+                          value: capitalize(priorityRaw).replaceAll("-", " "),
+                          color: priorityColor[priorityRaw],
+                        }
                         : undefined,
                       tooltip: "Priority",
                     },
@@ -496,9 +499,9 @@ function ProjectTasksList({ project }: { project: Project }) {
                                 shortcut={
                                   statusKey[status.id]
                                     ? {
-                                        Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
-                                        macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
-                                      }
+                                      Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
+                                      macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
+                                    }
                                     : undefined
                                 }
                                 title={status.name}

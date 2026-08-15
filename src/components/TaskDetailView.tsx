@@ -1,8 +1,9 @@
-import { ActionPanel, Action, Icon, Detail, getPreferenceValues } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { ActionPanel, Action, Icon, Detail, getPreferenceValues, Image } from "@raycast/api";
+import { getAvatarIcon, usePromise } from "@raycast/utils";
 import { ChangeStatus, ChangePriority, CopyTaskTitle, CopyTaskDescription, SubTask, ParentTask } from "../shortcut";
 import { KaneoAPI } from "../api/kaneo";
 import { formatDate, cleanDescription, statusKey, priorityKey } from "../lib/task-helpers";
+import { getApiUrl } from "../lib/get-api-url";
 
 export function TaskDetailView({
   taskId,
@@ -84,6 +85,8 @@ ${formatDate(task.createdAt)}
     await revalidate();
   };
 
+  console.log(task);
+
   return (
     <Detail
       navigationTitle={task.title}
@@ -94,7 +97,15 @@ ${formatDate(task.createdAt)}
           <Detail.Metadata.Label title="Priority" text={priority} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Due Date" text={formatDate(task.dueDate)} />
-          <Detail.Metadata.Label title="Assignee" text={task.assigneeName || "Unassigned"} />
+          <Detail.Metadata.Label
+            title="Assignee"
+            text={task.assigneeName || "Unassigned"}
+            icon={task.assigneeName
+              ? task.assigneeImage
+                ? { source: getApiUrl(task.assigneeImage), mask: Image.Mask.Circle }
+                : getAvatarIcon(`${task.assigneeName}`)
+              : undefined}
+          />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Created At" text={formatDate(task.createdAt)} />
         </Detail.Metadata>
@@ -156,9 +167,9 @@ ${formatDate(task.createdAt)}
                     shortcut={
                       statusKey[status.id]
                         ? {
-                            Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
-                            macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
-                          }
+                          Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
+                          macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
+                        }
                         : undefined
                     }
                     title={status.name}
