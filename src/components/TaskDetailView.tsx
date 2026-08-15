@@ -85,8 +85,6 @@ ${formatDate(task.createdAt)}
     await revalidate();
   };
 
-  console.log(task);
-
   return (
     <Detail
       navigationTitle={task.title}

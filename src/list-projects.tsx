@@ -210,7 +210,6 @@ function ProjectTasksList({ project }: { project: Project }) {
 
   const userId = session?.user?.id ?? null;
 
-  console.log(session?.user);
   const toggleAssignTask = async (task: Task) => {
     if (!userId) {
       await showToast({
