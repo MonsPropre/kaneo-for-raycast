@@ -47,6 +47,76 @@
       "subtitle": "Kaneo"
     }
   ],
+  "tools": [
+    {
+      "name": "list-projects-ai",
+      "title": "List Projects",
+      "description": "List and search Kaneo projects. Use this tool when the user asks about projects.",
+      "mode": "no-view"
+    },
+    {
+      "name": "list-tasks-ai",
+      "title": "List Tasks",
+      "description": "List and filter Kaneo tasks. Use this tool when the user asks about tasks, priorities, statuses, or due dates.",
+      "mode": "no-view"
+    },
+    {
+      "name": "list-notifications-ai",
+      "title": "List Notifications",
+      "description": "List Kaneo notifications. Use this tool when the user asks about notifications or unread activity.",
+      "mode": "no-view"
+    }
+  ],
+  "ai": {
+    "instructions": "Kaneo is a task management application for projects, tasks, and notifications. Use the available Kaneo tools to answer questions about the user's data. Use the project tool for project-related requests, the task tool for task-related requests, and the notification tool for notification-related requests. Never invent project IDs, task IDs, or notification data. Use only information returned by the tools. Preserve the user's language in the final response. Keep all command names and UI labels in English. This extension is read-only for search and listing requests.",
+    "evals": [
+      {
+        "input": "List my Kaneo projects",
+        "expected": [
+          {
+            "callsTool": "list-projects-ai"
+          }
+        ]
+      },
+      {
+        "input": "Show my tasks",
+        "expected": [
+          {
+            "callsTool": "list-tasks-ai"
+          }
+        ]
+      },
+      {
+        "input": "Show my high priority tasks",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-tasks-ai",
+              "arguments": {
+                "priority": "high"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "Show my notifications",
+        "expected": [
+          {
+            "callsTool": "list-notifications-ai"
+          }
+        ]
+      },
+      {
+        "input": "List my projects and tasks",
+        "expected": [
+          {
+            "callsTool": "kaneo-ai"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "instanceUrl",
