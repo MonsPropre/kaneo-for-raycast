@@ -373,11 +373,7 @@ function ProjectTasksList({ project }: { project: Project }) {
   const { sort, youAsAssignee } = getPreferenceValues<Preferences>();
   const projectId = project.id.toString();
 
-  const {
-    isLoading,
-    data: dProject,
-    revalidate,
-  } = usePromise((id: string) => api.getProjectTasks(id), [projectId]);
+  const { isLoading, data: dProject, revalidate } = usePromise((id: string) => api.getProjectTasks(id), [projectId]);
   const { session } = useAuthSession();
   const [projectDetail, setProjectDetail] = useState<ProjectDetail | undefined>(dProject);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
@@ -669,7 +665,11 @@ function ProjectTasksList({ project }: { project: Project }) {
                         icon={Icon.Plus}
                         shortcut={Keyboard.Shortcut.Common.New}
                         target={
-                          <CreateTaskForm projectId={projectId} columnStatuses={columnStatuses} onTaskCreated={refresh} />
+                          <CreateTaskForm
+                            projectId={projectId}
+                            columnStatuses={columnStatuses}
+                            onTaskCreated={refresh}
+                          />
                         }
                         onPop={refresh}
                       />
