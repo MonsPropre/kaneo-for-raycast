@@ -1,5 +1,16 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Project, ProjectDetail, Task, Notification, TaskRelation, Column } from "../types";
+import type {
+  Project,
+  ProjectDetail,
+  Task,
+  Notification,
+  TaskRelation,
+  Column,
+  CustomFieldDefinition,
+  CustomFieldValue,
+  CustomFieldFilterValues,
+  CustomFieldType,
+} from "../types";
 import { normalizeInstanceUrl } from "../lib/url";
 import { getApiUrl } from "../lib/get-api-url";
 
@@ -35,7 +46,9 @@ export class KaneoAPI {
       });
 
       if (!res.ok) {
-        throw new Error(`Kaneo API error: ${res.status} ${res.statusText}`);
+        // Inclure le body de la réponse pour comprendre pourquoi l'API refuse la requête
+        const body = await res.text().catch(() => "");
+        throw new Error(`Kaneo API error: ${res.status} ${res.statusText}${body ? ` - ${body}` : ""}`);
       }
 
       if (res.status === 204) {
@@ -115,11 +128,20 @@ export class KaneoAPI {
 
   async createTask(
     projectId: string,
-    body: { title: string; description?: string; status: string; priority: string; dueDate?: string },
+    body: {
+      title: string;
+      description?: string;
+      status: string;
+      priority: string;
+      dueDate?: string;
+      // Les valeurs sont toujours des strings (multiselect = tableau JSON stringifié)
+      customFields?: Array<{ fieldId: string; value: string }>;
+      draftAssetIds?: string[];
+    },
   ): Promise<Task> {
     return this.request<Task>(`/api/task/${projectId}`, {
       method: "POST",
-      body: JSON.stringify(body),
+      body: JSON.stringify({ draftAssetIds: [], ...body }),
     });
   }
 
@@ -163,5 +185,70 @@ export class KaneoAPI {
 
   async clearNotifications(): Promise<void> {
     return this.request<void>("/api/notification/clear-all", { method: "DELETE" });
+  }
+
+  // ---------- Custom fields ----------
+
+  async getCustomFields(projectId: string): Promise<CustomFieldDefinition[]> {
+    return this.request<CustomFieldDefinition[]>(`/api/custom-field/project/${projectId}`);
+  }
+
+  async getProjectCustomFieldValues(projectId: string): Promise<CustomFieldValue[]> {
+    return this.request<CustomFieldValue[]>(`/api/custom-field/project/${projectId}/values`);
+  }
+
+  async getTaskCustomFieldValues(taskId: string): Promise<CustomFieldValue[]> {
+    return this.request<CustomFieldValue[]>(`/api/custom-field/task/${taskId}`);
+  }
+
+  async getCustomFieldFilterValues(projectId: string): Promise<CustomFieldFilterValues[]> {
+    return this.request<CustomFieldFilterValues[]>(`/api/custom-field/project/${projectId}/filter-values`);
+  }
+
+  async createCustomField(body: {
+    projectId: string;
+    name: string;
+    type: CustomFieldType;
+    required?: boolean;
+    defaultValue?: unknown;
+    options?: string[];
+  }): Promise<CustomFieldDefinition> {
+    return this.request<CustomFieldDefinition>("/api/custom-field", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  }
+
+  async updateCustomField(
+    fieldId: string,
+    body: { name?: string; required?: boolean; defaultValue?: unknown; options?: string[] },
+  ): Promise<CustomFieldDefinition> {
+    return this.request<CustomFieldDefinition>(`/api/custom-field/${fieldId}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+  }
+
+  async reorderCustomFields(
+    projectId: string,
+    fields: Array<{ id: string; position: number }>,
+  ): Promise<CustomFieldDefinition[]> {
+    return this.request<CustomFieldDefinition[]>(`/api/custom-field/reorder/${projectId}`, {
+      method: "PUT",
+      body: JSON.stringify({ fields }),
+    });
+  }
+
+  async setCustomFieldValue(taskId: string, fieldId: string, value: unknown): Promise<CustomFieldValue> {
+    return this.request<CustomFieldValue>("/api/custom-field/value", {
+      method: "PUT",
+      body: JSON.stringify({ taskId, fieldId, value }),
+    });
+  }
+
+  async deleteCustomField(fieldId: string): Promise<CustomFieldDefinition> {
+    return this.request<CustomFieldDefinition>(`/api/custom-field/${fieldId}`, {
+      method: "DELETE",
+    });
   }
 }
