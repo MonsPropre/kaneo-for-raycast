@@ -1,9 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export function getApiUrl(path: string) {
-  const { instanceUrl } = getPreferenceValues<{ instanceUrl: string }>();
+  const { instanceUrl } = getPreferenceValues<Preferences>();
 
-  const base = instanceUrl.replace(/\/+$/, "");
+  const base = instanceUrl.trim().replace(/\/+$/, "");
   const baseUrl = base.endsWith("/api") ? base : `${base}/api`;
   const unprefixedPath = path.replace(/^\/+/, "").replace(/^api\/?/, "");
 
